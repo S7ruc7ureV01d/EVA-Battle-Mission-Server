@@ -1,0 +1,12 @@
+# Copyrighted/licensed game and engine files — not ours to redistribute,
+# and too large for a repo anyway. Keep locally, don't commit.
+*.apk
+/UnitySource/
+
+# Runtime artifacts
+server/logs/
+server/__pycache__/
+
+# Generated bundles (reproducible via `python3 server/build_bmdata.py`)
+server/BMData.bundle
+server/dummy.assetBundle
