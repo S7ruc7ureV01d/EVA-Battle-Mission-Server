@@ -493,8 +493,29 @@ const ROUTES = {
   '/gacha/list': handleGachaList,
 };
 
+// Direct (non-AssetBundle, non-master-data) image fetches — e.g.
+// TextureHolder.LoadCharacterImage()'s "resource/images/bigcard/
+// {id}_bigcard.png" — are plain `new WWW(url)` GETs the client expects
+// to resolve to real image bytes. Traced via IL (MenuController's
+// LoadCharacterTexture iterator, the main-page background image): it
+// only writes into the UITexture if `www.error` is EMPTY — our old
+// blanket 200-JSON "success" stub satisfied that, so the client cached
+// and applied `www.texture` on a response body that isn't a decodable
+// image, which is Unity's own built-in "broken/missing texture"
+// placeholder (rendered as a large red "?" over the main-page
+// background, since this UITexture is scaled to fill much of the
+// screen). A real HTTP error response makes the client skip the
+// texture-set step entirely instead, leaving the UI element untouched —
+// the honest option, since no original character art was ever archived
+// and none is synthesized here.
+const IMAGE_PATH_RE = /\.(png|jpe?g|gif)$/i;
+
 function handleUnknown(req, fields) {
-  log(`!! UNKNOWN ENDPOINT ${req.method} ${parseUrl(req).pathname} — fields: ${JSON.stringify(fields)}`);
+  const pathname = parseUrl(req).pathname;
+  log(`!! UNKNOWN ENDPOINT ${req.method} ${pathname} — fields: ${JSON.stringify(fields)}`);
+  if (IMAGE_PATH_RE.test(pathname)) {
+    return { notFound: true };
+  }
   // Best-effort generic "success, nothing to see here" reply: no
   // normalError/error keys means the client treats it as success.
   return { ts: nowUnix() };
@@ -547,6 +568,13 @@ const server = http.createServer((req, res) => {
       });
       res.end(buf);
       log(`-> 200 <text> ${responseObj.text}`);
+      return;
+    }
+
+    if (responseObj && responseObj.notFound) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+      log(`-> 404`);
       return;
     }
 

@@ -1442,6 +1442,42 @@ stable except 図鑑, which has a real client-side crash unrelated to
 server data. Everything else (一覧, 編成, 進化, 強化, ショップ, ガチャ,
 フレンド, ギルド, マイページ) is fully navigable with zero exceptions.
 
+## Session update (2026-08-26, continued — the main-page red "?" texture)
+
+Investigated the large red question-mark overlay that had been visible
+on the main-page background in nearly every screenshot this whole
+project.
+
+**Root cause, traced via `server/logs/requests.log` + IL**: on every
+main-page load the client does `GET /resource/images/bigcard/
+{myPageCardId:0000}_bigcard.png` (`TextureHolder.LoadCharacterImage`,
+called from `MenuController.LoadCharacterTexture` — the main-page
+background character art) — a plain `new WWW(url)` fetch, entirely
+outside the AssetBundle/master-data system. `MenuController`'s iterator
+only writes into the background `UITexture` if `www.error` is **empty**;
+our previous blanket "200 OK JSON" fallback for unknown routes satisfied
+that check, so the client cached and applied `www.texture` on a response
+body that isn't decodable image data — which is Unity's own built-in
+"broken/missing texture" placeholder, rendered huge because this
+`UITexture` is scaled to cover most of the main-page background. If the
+request returns a real HTTP error instead, the whole texture-write step
+is skipped entirely, per the same traced IL, leaving the element
+untouched.
+
+**Fix**: `server.js`'s `handleUnknown()` now special-cases any unmatched
+path ending in `.png`/`.jpg`/`.jpeg`/`.gif` and returns a real HTTP 404
+(new `{notFound: true}` response type in the dispatcher) instead of the
+generic JSON success stub — every other unmatched route keeps the old
+"200, nothing to see here" behavior, since that's still correct for
+non-image endpoints the client silently no-ops on. No character art is
+synthesized here (none was ever archived, consistent with this
+project's stated boundaries) — this just stops the client from
+mistaking a JSON error body for a valid texture.
+
+**Confirmed on-device**: fresh install → main menu — the red "?" is
+completely gone, the background now shows only the real (bundled)
+city/mountain scenery art with nothing overlaid on top.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community
