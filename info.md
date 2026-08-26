@@ -924,12 +924,77 @@ valid data satisfying it). Confirmed via this session's IL work that the
 precisely, if ever wanted — search `assembly-csharp.il` for
 `ldtoken Master\.` to get the full list.
 
+## Session update (2026-08-26 — reached the actual live main menu)
+
+Ran the "stub all 61 master tables empty" experiment. Result:
+**no `KeyNotFoundException` at all** — the client sailed straight past
+`/master` into a brand-new endpoint, `POST /login`. This settles the
+scoping question from the previous update: **master-data content is
+NOT required to reach a playable state.** The 61-table wall was a false
+alarm — it only needed *presence*, not real content.
+
+Kept going, tracing each new crash via IL exactly as before:
+
+- **`/login`**: `PlayerStatus.Login()`/`TitleController.OnLogin()`
+  require a `response["login"]` dict with `userCardList`/`userDeckList`
+  (empty ILists are fine — the per-item parse lambdas just never run),
+  `userStatus` (empty `{}` is fine, same lenient `JsonData<T>` reflection
+  pattern as `FirstSetUpData`), `selectMission.chapterList` (empty list),
+  `maxCardExtension` (must be a bare JSON integer — gets `unbox.any
+  Int64`, a decimal would throw `InvalidCastException`), and `tosVersion`
+  (string). **Non-obvious gotcha**: `tutorial` is read via `ldarg.0`
+  (the TOP-LEVEL response), not `ldloc.0` (the "login" sub-dict) like
+  every other field in this method — nesting it under `"login"` (the
+  natural-looking guess) still NRE'd; it has to be a sibling of `login`
+  at the top level. Fixed in `server.js`'s `handleLogin()`.
+- With that, `/login` succeeded end-to-end. **The client then showed a
+  Terms of Service dialog, accepted it, showed a real "Now Loading..."
+  screen with character art (Misato) and an actual progress bar, and
+  landed on the real, live, fully interactive main menu** — bottom nav
+  bar with マイページ (MyPage/NERV) / ミッション (Mission) / カード
+  (Card) / ショップ (Shop) / ガチャ (Gacha) / フレンド (Friend) / ギルド
+  (Guild), a MENU button, level indicator, currency counters. This is
+  the actual game, not a stub screen.
+
+**One crash was hit along the way**: the embedded Chrome WebView
+renderer process crashed (`chromium: aw_browser_terminator.cc: Renderer
+process crash detected`) while loading the ToS page content (which is
+just our generic `{"ts":...}` JSON stub for the unimplemented
+`GET /webview/tos` route, rendered raw by Chrome's WebView), which then
+caused Unity's own C# code to throw `InvalidOperationException` trying
+to use the now-dead WebView. This looks like an Android WebView/emulator
+stability issue triggered by feeding it non-HTML content, not a protocol
+or data-format bug — **relaunching the app immediately afterward landed
+cleanly on the main menu**, so it wasn't a hard blocker. If it recurs,
+implementing `/webview/tos` (and `/webview/help`, `/webview/news/list`
+per `EvaApiClient` constants) to return minimal real HTML instead of raw
+JSON would be the fix.
+
+**Newly discovered endpoints, not yet implemented** (currently answered
+by the generic `{"ts":...}` stub, logged as unknown):
+`GET /resource/images/bigcard/<id>_bigcard.png` (card art — explains the
+big broken-texture blob on the main menu screenshot), `POST /mypage`
+(home-screen player data), `GET /webview/tos`.
+
+**Where this actually leaves the project**: past the entire bootstrap
+chain and into the live, playable-looking main menu, with real game UI
+rendering and navigable. The originally-worried-about 61-table content
+wall turned out not to matter for reaching this point. Real per-screen
+content (card art, mission data, shop contents) will presumably still be
+needed once navigating into those specific screens — but the "protocol
+emulation vs. content authoring" boundary is now demonstrably much
+further out than this project assumed even a few hours ago in the same
+session. Next step if resumed: navigate into a nav-bar screen (e.g.
+ミッション) and see what it actually needs — likely resumes needing the
+real Tier 1/2 master data (`m_card`, `m_mission`, `m_wave`, etc.) this
+session deliberately left empty to test the bootstrap-only path.
+
 **Summary of what a resumed session inherits**: a fully working local
 private-server emulation from cold boot through real account
-setup/first/comp and into master-data loading, using only
-protocol-format knowledge (no real game content) — further than this
-project has ever gotten, and further than server-side emulation alone
-can go without authoring replacement content.
+setup/first/comp/login and ToS acceptance, all the way to the actual
+live, interactive main menu screen — using only protocol-format
+knowledge, zero real master/card/mission content. Far further than this
+project ever expected to get from format emulation alone.
 0. (new, from this session) Find and read whatever sets
    `m_ActivePreallocatedPathID`/`m_ActivePreallocatedIDBase` for a
    WWW-streamed/temporary assetbundle load, to confirm or kill the
@@ -1054,6 +1119,94 @@ machine.
    should still work for getting back to a fillable login form; from
    there it's just completing the sign-in and running the batch-mode
    build command noted above.
+
+## Session update (2026-08-25, later — real wiki data + card population + login flow)
+
+Found a live community wiki with genuine datamined content for this exact
+game: `eva-battlemission.gamerch.com`. This overturned the earlier "no
+original content archived anywhere" conclusion for at least card stats —
+Tier 1 data (real, directly usable) turned out to include the full card
+roster with stats; scenario/puzzle-board layouts remain unarchived
+(Tier 3, still needs synthesis or stubbing).
+
+**Empirical test, run before investing in scraping**: temporarily served
+all 61 master tables (`m_card`, `m_scenario`, etc. — enumerated via
+`TypeToTableName`'s actual regex transform, `"m_" + snake_case(className)`,
+not the raw class name as an earlier session wrongly assumed) as empty
+arrays via `/master`. **Result: no crash.** The client tolerates a fully
+empty master dataset and proceeds to `/login` regardless — master data is
+consumed lazily per-screen, not validated as a precondition at load time.
+This meant real data could be added incrementally, table by table, rather
+than needing all 61 populated before testing anything.
+
+**Card data scraped and wired in**:
+- Used `curl` + a hand-written Python regex HTML table parser
+  (`scratchpad/parse_cards.py`) against the wiki's per-rarity card-list
+  pages (UR/SR/R/N), not `WebFetch`'s AI summarization — the summarizer
+  silently dropped numeric stat columns on large (~60+ row) tables, only
+  caught by manually diffing a sample of parsed rows against the live
+  page.
+- Encoded 261 real cards into `Master.Card::Parse()`'s exact 27-field
+  schema (`cardId`, `rarityId`, `cost`, `cardName`, `elementType`,
+  grow-type/stat quadruplets, `memberSkillId0-5`, `leaderSkillId0-5`,
+  etc.) — `server/data_m_card.json`, wired into `server.js` via
+  `MASTER_TABLE_DATA.m_card`.
+- `/login`'s `userCardList` now grants 12 real starter cards (the
+  wiki-listed rarityId≥3 cards, first 12) with stats derived from each
+  card's own `defaultHp`/`defaultAttack`/etc. fields.
+
+**`/login` field requirements (traced via IL)**: mirrors the `/setup/first`
+pattern — most `login` sub-object fields are read via the lenient
+reflection-based parser (missing keys silently default), **except
+`tutorial`, which is read directly off the top-level response
+(`ldarg.0`), not nested inside `login` (`ldloc.0`)** — the one
+inconsistency in an otherwise-uniform response shape. Nesting it inside
+`login` (the natural-looking first guess) still throws; costs a full
+IL re-read to catch since every other field follows the opposite
+pattern.
+
+**WebView ToS crash fixed**: `/webview/tos` previously returned the
+generic JSON stub, which Chrome's embedded WebView rendered as its
+built-in JSON viewer — this reproducibly crashed the WebView renderer
+process (`aw_browser_terminator.cc`), which Unity's own code then turned
+into an `InvalidOperationException` from using the now-dead WebView.
+Fixed by adding a `{html: "..."}` response-type branch to `server.js`'s
+dispatcher and a `handleWebview()` returning real (placeholder-text)
+HTML for `/webview/tos`, `/webview/help`, `/webview/news/list`. **Not
+fully resolved**: the same `InvalidOperationException`/WebView-renderer
+crash was still observed intermittently afterward, sometimes bouncing
+the whole app to the Android home screen. Root cause not found — looks
+like emulator-level WebView flakiness (the crash is timing-sensitive,
+not reproduced by any specific content change), not a content-shape bug.
+Treated as non-blocking: a relaunch (`adb shell monkey -p com.bushiroad.eva
+-c android.intent.category.LAUNCHER 1`) always recovers, and once the
+"agree to ToS" flag is set in `PlayerPrefs`, subsequent launches skip the
+ToS WebView screen entirely and go straight to the main menu, so the
+flaky screen is only ever hit once per fresh install.
+
+**"Returning user" launch-flow quirk, not investigated**: a relaunch
+*without* `pm clear` sometimes shows a distinct "データ更新中" (data
+updating) screen that bounces back to the title screen rather than
+proceeding, separate from the WebView crash above. Not chased — low
+priority, since a `pm clear` + fresh-install cycle is reliable for
+testing.
+
+**Confirmed working end-to-end, verified on-device**: fresh install →
+title screen ("TAP START") → real-HTML ToS screen → agree → main menu
+(all six menu hexagons populated: マイページ/ミッション/カード/ショップ/
+ガチャ/フレンド/ギルド) → カード → 一覧 (card list) → shows **"12枚所持"**
+(12 owned), matching exactly the `USER_CARD_LIST` grant, each with a
+5-star rarity-icon row rendering (card art itself absent — no image
+assets, expected) and "Lv Max" labels. Confirms the full pipeline —
+wiki scrape → `data_m_card.json` → `/master`'s `m_card` table →
+`/login`'s `userCardList` → in-game UI — works correctly.
+
+**Not yet scraped**: `SkillMember`/`SkillLeader` (skill data — confirmed
+present on the same wiki, not yet pulled) and `Chapter` (22 real chapter
+titles — also confirmed present, not yet pulled). Natural next Tier-1
+targets if continuing the same approach. Puzzle-board/stage layout data
+remains genuinely unarchived (Tier 3) — would need synthesis from
+scratch, unlike cards/skills/chapters.
 
 ## Prior art search (2026-08-25)
 

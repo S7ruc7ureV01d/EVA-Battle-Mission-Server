@@ -159,8 +159,153 @@ function handleBushimoInheritingComp(req, fields) {
 // (real character/puzzle/scenario master data) but none of that content
 // was ever archived anywhere (see info.md) — an empty list at least lets
 // the client proceed past this call without crashing.
+// EMPIRICAL TEST (2026-08-25, see info.md): Master.MasterInitializer.Load()
+// doesn't iterate whatever `masterData` we send — it walks a HARDCODED,
+// compiled-in array of 61 System.Type entries (MasterInitializer.assetNames,
+// confirmed via IL: a Type[] literal built from 61 `ldtoken Master.<Name>`
+// instructions) and does a RAW dictionary indexer (`data[tableName]`, not
+// TryGetValue) for every single one — so any missing table throws
+// KeyNotFoundException immediately. Table names are NOT the raw class name:
+// MasterInitializer.TypeToTableName() does
+// `"m" + Regex.Replace(type.Name, "([A-Z])", "_$0")` then `.ToLower()` —
+// e.g. "SkillMember" -> "m_skill_member", "GuildVersusEvent" ->
+// "m_guild_versus_event". This list is that exact transform applied to all
+// 61 `ldtoken Master.*` names found in Assembly-CSharp.dll's IL (grep
+// `ldtoken Master\.` to regenerate/verify against a fresh disassembly).
+//
+// Sending all 61 with empty tableValues is a scoping experiment: it tells
+// us how far an entirely-real-cast, entirely-empty-content client gets
+// before the NEXT missing-data crash, which bounds how much of the 61
+// tables need real (wiki-sourced) vs. synthesized (invented) vs. genuinely
+// empty/stubbable data to reach a playable state. See info.md for results
+// once run.
+const MASTER_TABLE_NAMES = [
+  'm_abnormal_condition', 'm_banner', 'm_bossrush_boss', 'm_bossrush_event',
+  'm_bossrush_point_daily', 'm_bossrush_point_daily_reward', 'm_bossrush_point_reward',
+  'm_bossrush_point_special_card', 'm_card', 'm_card_bonus', 'm_card_legend',
+  'm_card_level', 'm_card_over_limit', 'm_chapter', 'm_chapter_card', 'm_enemy',
+  'm_enemy_abnormal_condition', 'm_enemy_party', 'm_gacha', 'm_gacha_group',
+  'm_gacha_step', 'm_guild_image', 'm_guild_level', 'm_guild_versus_event',
+  'm_guild_versus_model', 'm_guild_versus_point_daily', 'm_guild_versus_point_daily_reward',
+  'm_guild_versus_point_daily_user_reward', 'm_guild_versus_point_reward',
+  'm_guild_versus_point_user_reward', 'm_guild_versus_rank', 'm_guild_versus_special_card',
+  'm_invite_contents', 'm_login_bonus', 'm_login_bonus_detail', 'm_mission',
+  'm_mission_bonus', 'm_mission_clear_rank', 'm_mission_clear_reward',
+  'm_mission_point_clear', 'm_mission_point_enemy', 'm_mission_point_reward',
+  'm_mission_point_special_card', 'm_raid_boss_special_card', 'm_raid_encount',
+  'm_raid_event', 'm_scenario', 'm_shop_stone', 'm_skill_leader', 'm_skill_member',
+  'm_special_contents', 'm_team_battle', 'm_team_battle_point_reward', 'm_team_event',
+  'm_team_group', 'm_team_point_special_card', 'm_tips', 'm_user_level', 'm_wave',
+  'm_wave_block', 'm_wave_message',
+];
+
+// Real card roster, scraped from the community wiki (eva-battlemission.
+// gamerch.com — a dedicated wiki for this exact game, still live) and
+// encoded to match Master.Card::Parse()'s exact field list — confirmed via
+// IL that Parse() is NOT the lenient JsonData<T>-reflection pattern used
+// elsewhere; it's hand-generated code doing an unconditional
+// get_Item()+unbox.any per field, so every one of these 27 fields must be
+// present with the right type (Int64 for numerics — no decimal points) or
+// it throws immediately. cardId/rarityId/cost/cardName/elementType/stats
+// are real data (name, rarity, attribute, base+max HP/ATK/DEF/Recovery);
+// description/growType/basicExp/useType/skill-ids/salePrice/characterId
+// are synthesized placeholders (blank/constant/zero) since the wiki
+// doesn't document them and the client doesn't validate them — see
+// info.md for the full scraping/encoding writeup.
+const CARD_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_card.json'), 'utf8'));
+
+const MASTER_TABLE_DATA = {
+  m_card: CARD_DATA,
+};
+
 function handleMaster(req, fields) {
-  return { masterData: [], ts: nowUnix() };
+  return {
+    masterData: MASTER_TABLE_NAMES.map((tableName) => ({
+      tableName,
+      tableValues: MASTER_TABLE_DATA[tableName] || [],
+    })),
+    ts: nowUnix(),
+  };
+}
+
+// PlayerStatus.Login()/TitleController.OnLogin() (see info.md) require a
+// nested response["login"] dict with several keys accessed via raw
+// (non-null-checked) IDictionary indexers:
+//   userCardList (IList, -> Card.Parse per entry — empty list skips this)
+//   userDeckList (IList, -> Response.DeckList.Parse — empty list is fine)
+//   userStatus (IDictionary, -> Response.UserStatus.Parse — a lenient
+//     JsonData<T>-style reflection parser like FirstSetUpData, so {} is
+//     safe; get_maxCardNum()/get_userName() read after Parse() just get
+//     type defaults (0 / null))
+//   selectMission (IDictionary, -> PlayerStatus.LoadMission, which itself
+//     requires selectMission["chapterList"] as an IList -> Response.
+//     Chapter.LoadList — empty list, untested whether LoadList(null)
+//     would've been safe, empty array is the low-risk choice)
+//   maxCardExtension, unboxed as Int64 — must be a JSON integer (no
+//     decimal point) or the unbox.any throws an InvalidCastException
+//   tosVersion (string, float32.TryParse'd — anything parseable is fine)
+// `tutorial` is the one exception — read via `ldarg.0` (the TOP-LEVEL
+// response), not `ldloc.0` (the "login" sub-dict) like everything else in
+// this method — confirmed by re-reading the IL closely after the first
+// attempt (nesting it under "login") still NRE'd. -> tutorial["tutorialId"],
+// also unboxed as Int64.
+// PlayerStatus's per-entry `userCardList` parse target is a DIFFERENT
+// `Card` class from `Master.Card` — an owned-card instance
+// (userCardId/cardId/level/rank/hp/atk/def/recovery/exp/...) that extends
+// `JsonData<Card>`, the same LENIENT reflection-based parser as
+// FirstSetUpData/UserStatus (confirmed via IL — unlike Master.Card's
+// strict hand-generated Parse()). So unlike m_card, we don't need every
+// field here — just enough to reference a real card from CARD_DATA by
+// cardId. Grant a small real starter roster so there's something to
+// actually see/use in the Card/Deck screens.
+const STARTER_CARD_IDS = CARD_DATA.filter((c) => c.rarityId >= 3).slice(0, 12).map((c) => c.cardId);
+const USER_CARD_LIST = STARTER_CARD_IDS.map((cardId, i) => {
+  const master = CARD_DATA.find((c) => c.cardId === cardId);
+  return {
+    userCardId: 1000 + i,
+    cardId,
+    level: 1,
+    maxLevel: 1,
+    rank: 0,
+    hp: master.defaultHp,
+    atk: master.defaultAttack,
+    def: master.defaultDefence,
+    recovery: master.defaultRecovery,
+    exp: 0,
+    createTime: nowUnix(),
+    leaderSkillId: 0,
+    memberSkillId: 0,
+    deleted: false,
+  };
+});
+
+// GET /webview/tos (and friends — INQUIRY_URL/HELP_URL/INFO_URL constants
+// from EvaApiClient) is loaded directly into an embedded Chrome WebView,
+// not parsed by Unity/C# at all. Our earlier generic JSON stub
+// (`{"ts":...}`) got rendered by Chrome as raw text/JSON-viewer content,
+// which reproducibly crashed the WebView's renderer process
+// (`chromium: aw_browser_terminator.cc: Renderer process crash detected`)
+// on this specific Android/WebView build — not a Unity or protocol bug,
+// but real HTML avoids it entirely.
+function handleWebview(req, fields) {
+  return {
+    html: '<!doctype html><html><body><p>(placeholder — local server)</p></body></html>',
+  };
+}
+
+function handleLogin(req, fields) {
+  return {
+    login: {
+      userCardList: USER_CARD_LIST,
+      userDeckList: [],
+      userStatus: {},
+      selectMission: { chapterList: [] },
+      maxCardExtension: 0,
+      tosVersion: '1.0',
+    },
+    tutorial: { tutorialId: 0 },
+    ts: nowUnix(),
+  };
 }
 
 // The asset-bundle "resource map" the client downloads right after
@@ -216,6 +361,10 @@ const ROUTES = {
   '/BMRedirect.txt': handleBMRedirect,
   '/dummy.assetBundle': handleDummyBundle,
   '/master': handleMaster,
+  '/webview/tos': handleWebview,
+  '/webview/help': handleWebview,
+  '/webview/news/list': handleWebview,
+  '/login': handleLogin,
 };
 
 function handleUnknown(req, fields) {
@@ -252,6 +401,17 @@ const server = http.createServer((req, res) => {
 
     const handler = matchRoute(pathname) || handleUnknown;
     const responseObj = handler(req, fields);
+
+    if (responseObj && typeof responseObj.html === 'string') {
+      const buf = Buffer.from(responseObj.html, 'utf8');
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Length': buf.length,
+      });
+      res.end(buf);
+      log(`-> 200 <html> ${buf.length} bytes`);
+      return;
+    }
 
     if (responseObj && typeof responseObj.text === 'string') {
       const buf = Buffer.from(responseObj.text, 'utf8');
