@@ -1376,6 +1376,43 @@ further into each submenu (一覧/編成/進化 under カード, individual guil
 flows, etc.) to find the next unhandled endpoint or crash, continuing the
 same screen-by-screen method.
 
+## Session update (2026-08-26, continued — 編成/deck-building crash)
+
+Descending one level further (カード → 編成) surfaced the next crash: a
+`KeyNotFoundException` in `Response.Deck.get_Item` →
+`FormationController.ExecuteSort()`.
+
+Traced via IL: `PlayerStatus.Login()` builds `PlayerStatus.Decks` from
+`response["login"]["userDeckList"]` via `Response.DeckList::Parse`. If
+that list is **empty** (our previous `[]`), `DeckList.Parse` synthesizes
+5 blank `Response.Deck` objects with a completely empty `cards`
+dictionary — not even a leader slot. `FormationController.ExecuteSort()`
+(entered whenever カード→編成 opens) does an **unconditional**
+`currentDeck[1]` (`Response.Deck::get_Item`, a raw
+`Dictionary<int32,Card>` indexer, not `TryGetValue`) as its very first
+line, before any of the method's later, more careful
+`Position(int32)`-based (null-safe) lookups — a blank deck has no entry
+at key 1, so this throws immediately on every account, every time.
+
+Fixed by sending 5 real decks in `/login`'s `userDeckList` (matching the
+UI's 5 formation-slot tabs, "Deck1".."Deck5"), each with a populated
+leader (`position: 1`) and 5 members (`position: 2-6`), cycling through
+the 12 real granted starter cards. Traced `Response.Deck::Parse`'s exact
+field requirements: each `deckCardList` entry needs `position` and
+`userCardId`, both parsed via `int64.Parse(x.ToString())` — i.e. read as
+strings via `ToString()`, not typed as raw JSON numbers, though plain
+JS numbers serialize to a form `ToString()` parses fine either way.
+
+**Confirmed on-device**: 編成 (Deck 01) now renders the full formation
+screen — leader/sub slots correctly populated (リーダー + 5×サブ),
+real **computed** stats from actual card data (HP 980 / 攻撃 960 /
+防御 690 / 回復 250 — summed from the 6 assigned cards' real
+`defaultHp`/`defaultAttack`/etc.), and the card-picker grid below
+correctly highlights which of the 12 owned cards are currently slotted.
+Zero exceptions. This is the deepest and most fully-data-driven screen
+reached so far — confirms the wiki-sourced card stats flow correctly
+through actual in-game formation math, not just static display.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community

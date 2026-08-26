@@ -344,11 +344,39 @@ const CHAPTER_LIST = CHAPTER_DATA.map((c) => ({
   missionList: [],
 }));
 
+// PlayerStatus.Login() builds PlayerStatus.Decks from
+// response["login"]["userDeckList"] via Response.DeckList::Parse — traced
+// via IL: if that list is EMPTY, DeckList.Parse synthesizes 5 blank Deck
+// objects with a completely empty `cards` dictionary (not even a leader
+// slot). That's exactly what an empty [] produced. The crash this causes
+// isn't in DeckList itself — it's the very first line of
+// FormationController.ExecuteSort() (entered when opening カード→編成),
+// which does an UNCONDITIONAL `currentDeck[1]` (the leader-slot indexer,
+// Response.Deck::get_Item — a raw Dictionary<int32,Card> lookup, not
+// TryGetValue) before any of the rest of the method's more careful
+// Position(int32)-based (safe/nullable) lookups. A blank deck has no
+// entry at key 1 → KeyNotFoundException. Fixed by sending 5 real decks
+// (matching the UI's 5 formation-slot tabs, "Deck1".."Deck5") each with
+// a populated leader (position 1) and 5 members (positions 2-6), cycling
+// through our 12 real granted starter cards. Response.Deck::Parse reads
+// each deckCardList entry's "position"/"userCardId" as STRINGS
+// (int64.Parse(x.ToString())), not raw JSON numbers — matched here by
+// emitting them as JS numbers, which JSON.stringify renders as bare
+// digits that ToString() on the boxed value still parses fine.
+const USER_DECK_LIST = Array.from({ length: 5 }, (_, deckIdx) => ({
+  deckNo: deckIdx + 1,
+  deckCost: 0,
+  deckCardList: Array.from({ length: 6 }, (_, slot) => ({
+    position: slot + 1,
+    userCardId: USER_CARD_LIST[(deckIdx * 6 + slot) % USER_CARD_LIST.length].userCardId,
+  })),
+}));
+
 function handleLogin(req, fields) {
   return {
     login: {
       userCardList: USER_CARD_LIST,
-      userDeckList: [],
+      userDeckList: USER_DECK_LIST,
       userStatus: {},
       selectMission: { chapterList: CHAPTER_LIST },
       maxCardExtension: 0,
