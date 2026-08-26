@@ -432,6 +432,34 @@ function handleGachaList(req, fields) {
   };
 }
 
+// LibraryController.GetLibrary() hits "library/main"; InitLibrary()
+// (its onSuccess) does three unconditional get_Item reads on
+// response["libraryMain"]: "libraryCardList" (IList of dicts, each with
+// an unconditional "cardId" Int64 — this is the set of cards the player
+// has ever owned/discovered, rendered with real art via
+// Master.Card.Find(cardId); everything else in the roster renders as a
+// locked silhouette via CardListIcon.NoIcon()), "userLibraryNum" and
+// "totalLibraryNum" (both Int64, shown as the "N/total" counter label).
+// Also calls CardIconHolder.Instance.AdjustIconNum(totalLibraryNum) to
+// size the icon pool — plausibly related to the separate
+// LibraryController.InitFirstView() NullReferenceException documented
+// above (CardIconHolder.icons is a static list that may only get
+// populated once some screen successfully calls AdjustIconNum), though
+// that crash happens earlier in Start() and isn't confirmed fixed by
+// this alone. libraryCardList reuses the same "discovered" set as our
+// granted starter cards; totalLibraryNum is the full real 261-card
+// roster from data_m_card.json.
+function handleLibraryMain(req, fields) {
+  return {
+    libraryMain: {
+      libraryCardList: STARTER_CARD_IDS.map((cardId) => ({ cardId })),
+      userLibraryNum: STARTER_CARD_IDS.length,
+      totalLibraryNum: CARD_DATA.length,
+    },
+    ts: nowUnix(),
+  };
+}
+
 // The asset-bundle "resource map" the client downloads right after
 // `inspection` succeeds. Must be a real Unity AssetBundle binary (not
 // JSON) containing one TextAsset named "BundleData" whose text is a JSON
@@ -491,6 +519,7 @@ const ROUTES = {
   '/login': handleLogin,
   '/mypage': handleMyPage,
   '/gacha/list': handleGachaList,
+  '/library/main': handleLibraryMain,
 };
 
 // Direct (non-AssetBundle, non-master-data) image fetches — e.g.

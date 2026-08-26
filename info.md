@@ -1478,6 +1478,59 @@ mistaking a JSON error body for a valid texture.
 completely gone, the background now shows only the real (bundled)
 city/mountain scenery art with nothing overlaid on top.
 
+## Session update (2026-08-26, continued — deck/edit and library/main)
+
+Investigated the two remaining unmatched endpoints noted from earlier
+testing (`POST /deck/edit`, `POST /library/main`).
+
+**`deck/edit`**: traced via IL — `FormationController.SaveDeck()`'s
+success callback (`OnSaveDeckSuccess`) doesn't read a single field from
+the response `IDictionary` at all; it just sets
+`PlayerStatus.mainDeckNo` from local state and calls
+`RemoveCurrentPage()`. The existing generic `{"ts":...}` fallback was
+already completely safe here — no server change needed, just confirmed
+via IL rather than assumed.
+
+**`library/main`**: `LibraryController.GetLibrary()`'s success callback
+(`InitLibrary`) does three unconditional `get_Item` reads on
+`response["libraryMain"]`: `libraryCardList` (`IList` of dicts, each
+with an unconditional `cardId` Int64 — the set of cards the player has
+ever discovered, rendered with real art via `Master.Card.Find`;
+everything else in the roster shows as a locked silhouette),
+`userLibraryNum`, and `totalLibraryNum` (both Int64, the "N/total"
+counter). Added `handleLibraryMain()` in `server.js`, reusing the same
+12 granted starter cards as "discovered" and the real 261-card
+`CARD_DATA.length` as the total. This was a real, previously-unhandled
+crash risk (same `NullReferenceException` shape as every other
+unconditional-`get_Item` bug fixed this project) — confirmed the fix
+itself works (`curl` round-trip returns the correct shape).
+
+**However — this did not fix the separate 図鑑 crash documented
+earlier.** Re-testing on-device: `LibraryController.Start()` calls
+`InitFirstView()` **before** `GetLibrary()` ever runs (confirmed via
+IL order), so the `NullReferenceException` inside `InitFirstView()`
+(iterating the static `CardIconHolder.icons` list — see the prior
+session update) fires before any network request is even made,
+regardless of what `library/main` would have returned. Confirmed this
+by testing two different `totalLibraryNum` values (261 real vs. 20
+diagnostic) — both hit the identical `InitFirstView()` crash location,
+proving the crash is unrelated to response size/content. (One test run
+showed an extended ~3-minute UI stall instead of an immediate crash
+before eventually — this looks like unrelated emulator/rendering jank,
+not a data-driven hang, since a second identical test crashed promptly
+at the same line instead.) `totalLibraryNum` is restored to the real
+`CARD_DATA.length` (261) since the diagnostic value didn't change the
+outcome and the real number is more honest regardless.
+
+**Updated conclusion**: `library/main`'s handler is still a real,
+correct fix worth keeping (it prevents a genuine crash for any request
+that *does* reach it), but 図鑑 remains unreachable due to the earlier,
+separate `InitFirstView()` client-side bug, confirmed again to be
+entirely independent of server response data. No further avenue to fix
+this from the server side — it would require deeper Unity-internals
+work (patching the shipped DLL) which is out of scope unless explicitly
+requested.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community
