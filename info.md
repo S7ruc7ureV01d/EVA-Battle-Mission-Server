@@ -1413,6 +1413,35 @@ Zero exceptions. This is the deepest and most fully-data-driven screen
 reached so far — confirms the wiki-sourced card stats flow correctly
 through actual in-game formation math, not just static display.
 
+## Session update (2026-08-26, continued — 進化/強化/図鑑 sweep)
+
+Continued descending into カード submenus. 進化 (evolution) and 強化
+(strengthen) both load cleanly, correctly listing all 12 owned cards as
+candidates — no new issues, no server changes needed.
+
+**図鑑 (compendium) crashes, but not on anything server-controlled**:
+`LibraryController.Start()` → `InitFirstView()` throws a
+`NullReferenceException` purely iterating `CardIconHolder.icons` (a
+static client-side UI icon-pool list) and calling `.NoIcon()`/`.UnLock()`
+on each entry — confirmed via IL this happens **before** `GetLibrary()`
+(the method that would actually consume `/master`'s `m_card` data) is
+ever called, so this is not a missing-endpoint or bad-response-shape
+problem like every other crash fixed so far. `CardIconHolder.icons` is
+populated by NGUI's card-icon-grid instantiation at scene load,
+independent of any server response; the null is most likely either a
+stale/uncleared reference to a destroyed icon from a previous scene, or
+a prefab-instantiation failure tied to the missing real card-art assets
+this project has never had. Since there's no server response to change
+here, this is logged as a genuine client-side/asset limitation, not
+pursued further — consistent with this project's established boundary
+between protocol/data reverse-engineering (in scope) and Unity
+scene/asset internals requiring real game content (out of scope).
+
+**Updated status**: every menu screen down to この session's depth is
+stable except 図鑑, which has a real client-side crash unrelated to
+server data. Everything else (一覧, 編成, 進化, 強化, ショップ, ガチャ,
+フレンド, ギルド, マイページ) is fully navigable with zero exceptions.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community
