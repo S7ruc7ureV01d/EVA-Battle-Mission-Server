@@ -1281,6 +1281,52 @@ investigated**:
   `NullReferenceException` in `Response.MyPage.Parse`
   (`MenuController.OnSuccess`). Not yet traced/handled.
 
+## Session update (2026-08-26, continued — /mypage and m_user_level)
+
+Traced and fixed the two unrelated issues flagged at the end of the
+skill/chapter scraping session.
+
+**`GET /mypage`**: `Response.MyPage.Parse` (traced via IL) does
+`response["myPage"]` (unconditional — must be present), and unless that
+dict `.Contains("closed")` (a maintenance/account-closed flag we never
+send), reads five more unconditional `IList`/`IDictionary` `get_Item`
+calls with no null-check: `loginBonus`, `information`, `banner`,
+`startDashLogin` (all `IList` — empty arrays are fine, since their
+per-entry `.Parse()` calls are simply never invoked on an empty list),
+and `eventBanner` (`IDictionary` — `Response.EventBanner` turned out to
+be a plain lenient `JsonData<T>`, so `{}` is fine). Separately,
+`Model.StaminaModel.SetBonusTime` does its own two unconditional
+`get_Item` calls (`bonusEndTime`, `endTime`) on
+`myPage["infinityStaminaBonus"]`, so that nested object needs both keys
+present even though it's otherwise unrelated to the `MyPage` class
+itself. `"raid"`/`"guild"` are the only two truly optional keys (real
+`.Contains()` checks) — omitted. Added `handleMyPage()` in `server.js`,
+routed `/mypage` to it. Confirmed on-device: `/mypage` is polled
+repeatedly (looks like a periodic header refresh) with zero exceptions,
+where it previously threw a `NullReferenceException` in
+`Response.MyPage.Parse` on every single call.
+
+**`m_user_level` (empty-table crash)**: `Master.UserLevel.
+GetLevelFromAccumulateExp(exp)` does
+`collection.Values.Last(kv => kv.Value.accumulateExp <= exp)` — with an
+empty table this throws `InvalidOperationException` (`Enumerable.Last`
+with no match) for literally every player, including a brand-new one at
+`exp=0`, since there's no entry at all to match against. This fired on
+every single menu load, from `HeaderController.Awake()`. Unlike
+cards/skills/chapters, this is an internal game-balance table (level
+curve), not something the wiki documents — synthesized a placeholder
+99-level curve (linearly increasing `necessaryExp`, level 1 at
+`accumulateExp=0` so a fresh account resolves immediately) in
+`server/data_m_user_level.json`, wired into `MASTER_TABLE_DATA`.
+Confirmed on-device: the `InvalidOperationException` is gone, and the
+header now visibly renders "行動力MAX" (stamina-full label) instead of
+a blank bar — this table backs more of the header UI than just the
+level number.
+
+**Result**: zero exceptions anywhere in logcat across a full fresh-install
+→ ToS → main-menu cycle, for the first time this project has reached
+this state. The menu itself is stable and idle with no further errors.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community

@@ -1,0 +1,794 @@
+[
+ {
+  "level": 1,
+  "necessaryExp": 100,
+  "accumulateExp": 0,
+  "maxFollowNum": 10,
+  "maxCostNum": 55,
+  "maxStaminaNum": 31
+ },
+ {
+  "level": 2,
+  "necessaryExp": 150,
+  "accumulateExp": 100,
+  "maxFollowNum": 11,
+  "maxCostNum": 60,
+  "maxStaminaNum": 32
+ },
+ {
+  "level": 3,
+  "necessaryExp": 200,
+  "accumulateExp": 250,
+  "maxFollowNum": 11,
+  "maxCostNum": 65,
+  "maxStaminaNum": 33
+ },
+ {
+  "level": 4,
+  "necessaryExp": 250,
+  "accumulateExp": 450,
+  "maxFollowNum": 12,
+  "maxCostNum": 70,
+  "maxStaminaNum": 34
+ },
+ {
+  "level": 5,
+  "necessaryExp": 300,
+  "accumulateExp": 700,
+  "maxFollowNum": 12,
+  "maxCostNum": 75,
+  "maxStaminaNum": 35
+ },
+ {
+  "level": 6,
+  "necessaryExp": 350,
+  "accumulateExp": 1000,
+  "maxFollowNum": 13,
+  "maxCostNum": 80,
+  "maxStaminaNum": 36
+ },
+ {
+  "level": 7,
+  "necessaryExp": 400,
+  "accumulateExp": 1350,
+  "maxFollowNum": 13,
+  "maxCostNum": 85,
+  "maxStaminaNum": 37
+ },
+ {
+  "level": 8,
+  "necessaryExp": 450,
+  "accumulateExp": 1750,
+  "maxFollowNum": 14,
+  "maxCostNum": 90,
+  "maxStaminaNum": 38
+ },
+ {
+  "level": 9,
+  "necessaryExp": 500,
+  "accumulateExp": 2200,
+  "maxFollowNum": 14,
+  "maxCostNum": 95,
+  "maxStaminaNum": 39
+ },
+ {
+  "level": 10,
+  "necessaryExp": 550,
+  "accumulateExp": 2700,
+  "maxFollowNum": 15,
+  "maxCostNum": 100,
+  "maxStaminaNum": 40
+ },
+ {
+  "level": 11,
+  "necessaryExp": 600,
+  "accumulateExp": 3250,
+  "maxFollowNum": 15,
+  "maxCostNum": 105,
+  "maxStaminaNum": 41
+ },
+ {
+  "level": 12,
+  "necessaryExp": 650,
+  "accumulateExp": 3850,
+  "maxFollowNum": 16,
+  "maxCostNum": 110,
+  "maxStaminaNum": 42
+ },
+ {
+  "level": 13,
+  "necessaryExp": 700,
+  "accumulateExp": 4500,
+  "maxFollowNum": 16,
+  "maxCostNum": 115,
+  "maxStaminaNum": 43
+ },
+ {
+  "level": 14,
+  "necessaryExp": 750,
+  "accumulateExp": 5200,
+  "maxFollowNum": 17,
+  "maxCostNum": 120,
+  "maxStaminaNum": 44
+ },
+ {
+  "level": 15,
+  "necessaryExp": 800,
+  "accumulateExp": 5950,
+  "maxFollowNum": 17,
+  "maxCostNum": 125,
+  "maxStaminaNum": 45
+ },
+ {
+  "level": 16,
+  "necessaryExp": 850,
+  "accumulateExp": 6750,
+  "maxFollowNum": 18,
+  "maxCostNum": 130,
+  "maxStaminaNum": 46
+ },
+ {
+  "level": 17,
+  "necessaryExp": 900,
+  "accumulateExp": 7600,
+  "maxFollowNum": 18,
+  "maxCostNum": 135,
+  "maxStaminaNum": 47
+ },
+ {
+  "level": 18,
+  "necessaryExp": 950,
+  "accumulateExp": 8500,
+  "maxFollowNum": 19,
+  "maxCostNum": 140,
+  "maxStaminaNum": 48
+ },
+ {
+  "level": 19,
+  "necessaryExp": 1000,
+  "accumulateExp": 9450,
+  "maxFollowNum": 19,
+  "maxCostNum": 145,
+  "maxStaminaNum": 49
+ },
+ {
+  "level": 20,
+  "necessaryExp": 1050,
+  "accumulateExp": 10450,
+  "maxFollowNum": 20,
+  "maxCostNum": 150,
+  "maxStaminaNum": 50
+ },
+ {
+  "level": 21,
+  "necessaryExp": 1100,
+  "accumulateExp": 11500,
+  "maxFollowNum": 20,
+  "maxCostNum": 155,
+  "maxStaminaNum": 51
+ },
+ {
+  "level": 22,
+  "necessaryExp": 1150,
+  "accumulateExp": 12600,
+  "maxFollowNum": 21,
+  "maxCostNum": 160,
+  "maxStaminaNum": 52
+ },
+ {
+  "level": 23,
+  "necessaryExp": 1200,
+  "accumulateExp": 13750,
+  "maxFollowNum": 21,
+  "maxCostNum": 165,
+  "maxStaminaNum": 53
+ },
+ {
+  "level": 24,
+  "necessaryExp": 1250,
+  "accumulateExp": 14950,
+  "maxFollowNum": 22,
+  "maxCostNum": 170,
+  "maxStaminaNum": 54
+ },
+ {
+  "level": 25,
+  "necessaryExp": 1300,
+  "accumulateExp": 16200,
+  "maxFollowNum": 22,
+  "maxCostNum": 175,
+  "maxStaminaNum": 55
+ },
+ {
+  "level": 26,
+  "necessaryExp": 1350,
+  "accumulateExp": 17500,
+  "maxFollowNum": 23,
+  "maxCostNum": 180,
+  "maxStaminaNum": 56
+ },
+ {
+  "level": 27,
+  "necessaryExp": 1400,
+  "accumulateExp": 18850,
+  "maxFollowNum": 23,
+  "maxCostNum": 185,
+  "maxStaminaNum": 57
+ },
+ {
+  "level": 28,
+  "necessaryExp": 1450,
+  "accumulateExp": 20250,
+  "maxFollowNum": 24,
+  "maxCostNum": 190,
+  "maxStaminaNum": 58
+ },
+ {
+  "level": 29,
+  "necessaryExp": 1500,
+  "accumulateExp": 21700,
+  "maxFollowNum": 24,
+  "maxCostNum": 195,
+  "maxStaminaNum": 59
+ },
+ {
+  "level": 30,
+  "necessaryExp": 1550,
+  "accumulateExp": 23200,
+  "maxFollowNum": 25,
+  "maxCostNum": 200,
+  "maxStaminaNum": 60
+ },
+ {
+  "level": 31,
+  "necessaryExp": 1600,
+  "accumulateExp": 24750,
+  "maxFollowNum": 25,
+  "maxCostNum": 205,
+  "maxStaminaNum": 61
+ },
+ {
+  "level": 32,
+  "necessaryExp": 1650,
+  "accumulateExp": 26350,
+  "maxFollowNum": 26,
+  "maxCostNum": 210,
+  "maxStaminaNum": 62
+ },
+ {
+  "level": 33,
+  "necessaryExp": 1700,
+  "accumulateExp": 28000,
+  "maxFollowNum": 26,
+  "maxCostNum": 215,
+  "maxStaminaNum": 63
+ },
+ {
+  "level": 34,
+  "necessaryExp": 1750,
+  "accumulateExp": 29700,
+  "maxFollowNum": 27,
+  "maxCostNum": 220,
+  "maxStaminaNum": 64
+ },
+ {
+  "level": 35,
+  "necessaryExp": 1800,
+  "accumulateExp": 31450,
+  "maxFollowNum": 27,
+  "maxCostNum": 225,
+  "maxStaminaNum": 65
+ },
+ {
+  "level": 36,
+  "necessaryExp": 1850,
+  "accumulateExp": 33250,
+  "maxFollowNum": 28,
+  "maxCostNum": 230,
+  "maxStaminaNum": 66
+ },
+ {
+  "level": 37,
+  "necessaryExp": 1900,
+  "accumulateExp": 35100,
+  "maxFollowNum": 28,
+  "maxCostNum": 235,
+  "maxStaminaNum": 67
+ },
+ {
+  "level": 38,
+  "necessaryExp": 1950,
+  "accumulateExp": 37000,
+  "maxFollowNum": 29,
+  "maxCostNum": 240,
+  "maxStaminaNum": 68
+ },
+ {
+  "level": 39,
+  "necessaryExp": 2000,
+  "accumulateExp": 38950,
+  "maxFollowNum": 29,
+  "maxCostNum": 245,
+  "maxStaminaNum": 69
+ },
+ {
+  "level": 40,
+  "necessaryExp": 2050,
+  "accumulateExp": 40950,
+  "maxFollowNum": 30,
+  "maxCostNum": 250,
+  "maxStaminaNum": 70
+ },
+ {
+  "level": 41,
+  "necessaryExp": 2100,
+  "accumulateExp": 43000,
+  "maxFollowNum": 30,
+  "maxCostNum": 255,
+  "maxStaminaNum": 71
+ },
+ {
+  "level": 42,
+  "necessaryExp": 2150,
+  "accumulateExp": 45100,
+  "maxFollowNum": 31,
+  "maxCostNum": 260,
+  "maxStaminaNum": 72
+ },
+ {
+  "level": 43,
+  "necessaryExp": 2200,
+  "accumulateExp": 47250,
+  "maxFollowNum": 31,
+  "maxCostNum": 265,
+  "maxStaminaNum": 73
+ },
+ {
+  "level": 44,
+  "necessaryExp": 2250,
+  "accumulateExp": 49450,
+  "maxFollowNum": 32,
+  "maxCostNum": 270,
+  "maxStaminaNum": 74
+ },
+ {
+  "level": 45,
+  "necessaryExp": 2300,
+  "accumulateExp": 51700,
+  "maxFollowNum": 32,
+  "maxCostNum": 275,
+  "maxStaminaNum": 75
+ },
+ {
+  "level": 46,
+  "necessaryExp": 2350,
+  "accumulateExp": 54000,
+  "maxFollowNum": 33,
+  "maxCostNum": 280,
+  "maxStaminaNum": 76
+ },
+ {
+  "level": 47,
+  "necessaryExp": 2400,
+  "accumulateExp": 56350,
+  "maxFollowNum": 33,
+  "maxCostNum": 285,
+  "maxStaminaNum": 77
+ },
+ {
+  "level": 48,
+  "necessaryExp": 2450,
+  "accumulateExp": 58750,
+  "maxFollowNum": 34,
+  "maxCostNum": 290,
+  "maxStaminaNum": 78
+ },
+ {
+  "level": 49,
+  "necessaryExp": 2500,
+  "accumulateExp": 61200,
+  "maxFollowNum": 34,
+  "maxCostNum": 295,
+  "maxStaminaNum": 79
+ },
+ {
+  "level": 50,
+  "necessaryExp": 2550,
+  "accumulateExp": 63700,
+  "maxFollowNum": 35,
+  "maxCostNum": 300,
+  "maxStaminaNum": 80
+ },
+ {
+  "level": 51,
+  "necessaryExp": 2600,
+  "accumulateExp": 66250,
+  "maxFollowNum": 35,
+  "maxCostNum": 305,
+  "maxStaminaNum": 81
+ },
+ {
+  "level": 52,
+  "necessaryExp": 2650,
+  "accumulateExp": 68850,
+  "maxFollowNum": 36,
+  "maxCostNum": 310,
+  "maxStaminaNum": 82
+ },
+ {
+  "level": 53,
+  "necessaryExp": 2700,
+  "accumulateExp": 71500,
+  "maxFollowNum": 36,
+  "maxCostNum": 315,
+  "maxStaminaNum": 83
+ },
+ {
+  "level": 54,
+  "necessaryExp": 2750,
+  "accumulateExp": 74200,
+  "maxFollowNum": 37,
+  "maxCostNum": 320,
+  "maxStaminaNum": 84
+ },
+ {
+  "level": 55,
+  "necessaryExp": 2800,
+  "accumulateExp": 76950,
+  "maxFollowNum": 37,
+  "maxCostNum": 325,
+  "maxStaminaNum": 85
+ },
+ {
+  "level": 56,
+  "necessaryExp": 2850,
+  "accumulateExp": 79750,
+  "maxFollowNum": 38,
+  "maxCostNum": 330,
+  "maxStaminaNum": 86
+ },
+ {
+  "level": 57,
+  "necessaryExp": 2900,
+  "accumulateExp": 82600,
+  "maxFollowNum": 38,
+  "maxCostNum": 335,
+  "maxStaminaNum": 87
+ },
+ {
+  "level": 58,
+  "necessaryExp": 2950,
+  "accumulateExp": 85500,
+  "maxFollowNum": 39,
+  "maxCostNum": 340,
+  "maxStaminaNum": 88
+ },
+ {
+  "level": 59,
+  "necessaryExp": 3000,
+  "accumulateExp": 88450,
+  "maxFollowNum": 39,
+  "maxCostNum": 345,
+  "maxStaminaNum": 89
+ },
+ {
+  "level": 60,
+  "necessaryExp": 3050,
+  "accumulateExp": 91450,
+  "maxFollowNum": 40,
+  "maxCostNum": 350,
+  "maxStaminaNum": 90
+ },
+ {
+  "level": 61,
+  "necessaryExp": 3100,
+  "accumulateExp": 94500,
+  "maxFollowNum": 40,
+  "maxCostNum": 355,
+  "maxStaminaNum": 91
+ },
+ {
+  "level": 62,
+  "necessaryExp": 3150,
+  "accumulateExp": 97600,
+  "maxFollowNum": 41,
+  "maxCostNum": 360,
+  "maxStaminaNum": 92
+ },
+ {
+  "level": 63,
+  "necessaryExp": 3200,
+  "accumulateExp": 100750,
+  "maxFollowNum": 41,
+  "maxCostNum": 365,
+  "maxStaminaNum": 93
+ },
+ {
+  "level": 64,
+  "necessaryExp": 3250,
+  "accumulateExp": 103950,
+  "maxFollowNum": 42,
+  "maxCostNum": 370,
+  "maxStaminaNum": 94
+ },
+ {
+  "level": 65,
+  "necessaryExp": 3300,
+  "accumulateExp": 107200,
+  "maxFollowNum": 42,
+  "maxCostNum": 375,
+  "maxStaminaNum": 95
+ },
+ {
+  "level": 66,
+  "necessaryExp": 3350,
+  "accumulateExp": 110500,
+  "maxFollowNum": 43,
+  "maxCostNum": 380,
+  "maxStaminaNum": 96
+ },
+ {
+  "level": 67,
+  "necessaryExp": 3400,
+  "accumulateExp": 113850,
+  "maxFollowNum": 43,
+  "maxCostNum": 385,
+  "maxStaminaNum": 97
+ },
+ {
+  "level": 68,
+  "necessaryExp": 3450,
+  "accumulateExp": 117250,
+  "maxFollowNum": 44,
+  "maxCostNum": 390,
+  "maxStaminaNum": 98
+ },
+ {
+  "level": 69,
+  "necessaryExp": 3500,
+  "accumulateExp": 120700,
+  "maxFollowNum": 44,
+  "maxCostNum": 395,
+  "maxStaminaNum": 99
+ },
+ {
+  "level": 70,
+  "necessaryExp": 3550,
+  "accumulateExp": 124200,
+  "maxFollowNum": 45,
+  "maxCostNum": 400,
+  "maxStaminaNum": 100
+ },
+ {
+  "level": 71,
+  "necessaryExp": 3600,
+  "accumulateExp": 127750,
+  "maxFollowNum": 45,
+  "maxCostNum": 405,
+  "maxStaminaNum": 101
+ },
+ {
+  "level": 72,
+  "necessaryExp": 3650,
+  "accumulateExp": 131350,
+  "maxFollowNum": 46,
+  "maxCostNum": 410,
+  "maxStaminaNum": 102
+ },
+ {
+  "level": 73,
+  "necessaryExp": 3700,
+  "accumulateExp": 135000,
+  "maxFollowNum": 46,
+  "maxCostNum": 415,
+  "maxStaminaNum": 103
+ },
+ {
+  "level": 74,
+  "necessaryExp": 3750,
+  "accumulateExp": 138700,
+  "maxFollowNum": 47,
+  "maxCostNum": 420,
+  "maxStaminaNum": 104
+ },
+ {
+  "level": 75,
+  "necessaryExp": 3800,
+  "accumulateExp": 142450,
+  "maxFollowNum": 47,
+  "maxCostNum": 425,
+  "maxStaminaNum": 105
+ },
+ {
+  "level": 76,
+  "necessaryExp": 3850,
+  "accumulateExp": 146250,
+  "maxFollowNum": 48,
+  "maxCostNum": 430,
+  "maxStaminaNum": 106
+ },
+ {
+  "level": 77,
+  "necessaryExp": 3900,
+  "accumulateExp": 150100,
+  "maxFollowNum": 48,
+  "maxCostNum": 435,
+  "maxStaminaNum": 107
+ },
+ {
+  "level": 78,
+  "necessaryExp": 3950,
+  "accumulateExp": 154000,
+  "maxFollowNum": 49,
+  "maxCostNum": 440,
+  "maxStaminaNum": 108
+ },
+ {
+  "level": 79,
+  "necessaryExp": 4000,
+  "accumulateExp": 157950,
+  "maxFollowNum": 49,
+  "maxCostNum": 445,
+  "maxStaminaNum": 109
+ },
+ {
+  "level": 80,
+  "necessaryExp": 4050,
+  "accumulateExp": 161950,
+  "maxFollowNum": 50,
+  "maxCostNum": 450,
+  "maxStaminaNum": 110
+ },
+ {
+  "level": 81,
+  "necessaryExp": 4100,
+  "accumulateExp": 166000,
+  "maxFollowNum": 50,
+  "maxCostNum": 455,
+  "maxStaminaNum": 111
+ },
+ {
+  "level": 82,
+  "necessaryExp": 4150,
+  "accumulateExp": 170100,
+  "maxFollowNum": 51,
+  "maxCostNum": 460,
+  "maxStaminaNum": 112
+ },
+ {
+  "level": 83,
+  "necessaryExp": 4200,
+  "accumulateExp": 174250,
+  "maxFollowNum": 51,
+  "maxCostNum": 465,
+  "maxStaminaNum": 113
+ },
+ {
+  "level": 84,
+  "necessaryExp": 4250,
+  "accumulateExp": 178450,
+  "maxFollowNum": 52,
+  "maxCostNum": 470,
+  "maxStaminaNum": 114
+ },
+ {
+  "level": 85,
+  "necessaryExp": 4300,
+  "accumulateExp": 182700,
+  "maxFollowNum": 52,
+  "maxCostNum": 475,
+  "maxStaminaNum": 115
+ },
+ {
+  "level": 86,
+  "necessaryExp": 4350,
+  "accumulateExp": 187000,
+  "maxFollowNum": 53,
+  "maxCostNum": 480,
+  "maxStaminaNum": 116
+ },
+ {
+  "level": 87,
+  "necessaryExp": 4400,
+  "accumulateExp": 191350,
+  "maxFollowNum": 53,
+  "maxCostNum": 485,
+  "maxStaminaNum": 117
+ },
+ {
+  "level": 88,
+  "necessaryExp": 4450,
+  "accumulateExp": 195750,
+  "maxFollowNum": 54,
+  "maxCostNum": 490,
+  "maxStaminaNum": 118
+ },
+ {
+  "level": 89,
+  "necessaryExp": 4500,
+  "accumulateExp": 200200,
+  "maxFollowNum": 54,
+  "maxCostNum": 495,
+  "maxStaminaNum": 119
+ },
+ {
+  "level": 90,
+  "necessaryExp": 4550,
+  "accumulateExp": 204700,
+  "maxFollowNum": 55,
+  "maxCostNum": 500,
+  "maxStaminaNum": 120
+ },
+ {
+  "level": 91,
+  "necessaryExp": 4600,
+  "accumulateExp": 209250,
+  "maxFollowNum": 55,
+  "maxCostNum": 505,
+  "maxStaminaNum": 121
+ },
+ {
+  "level": 92,
+  "necessaryExp": 4650,
+  "accumulateExp": 213850,
+  "maxFollowNum": 56,
+  "maxCostNum": 510,
+  "maxStaminaNum": 122
+ },
+ {
+  "level": 93,
+  "necessaryExp": 4700,
+  "accumulateExp": 218500,
+  "maxFollowNum": 56,
+  "maxCostNum": 515,
+  "maxStaminaNum": 123
+ },
+ {
+  "level": 94,
+  "necessaryExp": 4750,
+  "accumulateExp": 223200,
+  "maxFollowNum": 57,
+  "maxCostNum": 520,
+  "maxStaminaNum": 124
+ },
+ {
+  "level": 95,
+  "necessaryExp": 4800,
+  "accumulateExp": 227950,
+  "maxFollowNum": 57,
+  "maxCostNum": 525,
+  "maxStaminaNum": 125
+ },
+ {
+  "level": 96,
+  "necessaryExp": 4850,
+  "accumulateExp": 232750,
+  "maxFollowNum": 58,
+  "maxCostNum": 530,
+  "maxStaminaNum": 126
+ },
+ {
+  "level": 97,
+  "necessaryExp": 4900,
+  "accumulateExp": 237600,
+  "maxFollowNum": 58,
+  "maxCostNum": 535,
+  "maxStaminaNum": 127
+ },
+ {
+  "level": 98,
+  "necessaryExp": 4950,
+  "accumulateExp": 242500,
+  "maxFollowNum": 59,
+  "maxCostNum": 540,
+  "maxStaminaNum": 128
+ },
+ {
+  "level": 99,
+  "necessaryExp": 5000,
+  "accumulateExp": 247450,
+  "maxFollowNum": 59,
+  "maxCostNum": 545,
+  "maxStaminaNum": 129
+ }
+]

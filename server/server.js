@@ -229,11 +229,26 @@ const SKILL_MEMBER_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_
 const SKILL_LEADER_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_skill_leader.json'), 'utf8'));
 const CHAPTER_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_chapter.json'), 'utf8'));
 
+// Master.UserLevel.GetLevelFromAccumulateExp(exp) does
+// `collection.Values.Last(kv => kv.Value.accumulateExp <= exp)` — with an
+// empty table this throws InvalidOperationException (Linq .Last() with no
+// match) for EVERY player, including a brand-new one at exp=0, since
+// there's no entry at all to match. Traced from a crash inside
+// HeaderController.Awake() on every menu load. No real level-curve data
+// exists on the wiki (this is an internal game-balance table, not
+// character/story content), so this is a synthesized placeholder curve —
+// linearly increasing necessaryExp, level 1 at accumulateExp=0 so a
+// fresh account resolves immediately. Good enough to stop the crash and
+// show a real (if arbitrary) number in the header; not meant to be a
+// faithful reconstruction of the original curve.
+const USER_LEVEL_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_user_level.json'), 'utf8'));
+
 const MASTER_TABLE_DATA = {
   m_card: CARD_DATA,
   m_skill_member: SKILL_MEMBER_DATA,
   m_skill_leader: SKILL_LEADER_DATA,
   m_chapter: CHAPTER_DATA,
+  m_user_level: USER_LEVEL_DATA,
 };
 
 function handleMaster(req, fields) {
@@ -344,6 +359,35 @@ function handleLogin(req, fields) {
   };
 }
 
+// MenuController's header, loaded right after login. Response.MyPage.Parse
+// (traced via IL) does response["myPage"] (unconditional get_Item — must
+// be present) then, unless that dict Contains("closed") (a
+// game-maintenance/account-closed flag we never want to send), reads FIVE
+// more unconditional IList/IDictionary get_Item calls with no null-check:
+// loginBonus, information, banner, startDashLogin (all IList — empty
+// arrays are fine, their per-entry Parse() calls are simply never
+// invoked), and eventBanner (IDictionary — Response.EventBanner is a
+// plain lenient JsonData<T>, {} is fine). Separately,
+// Model.StaminaModel.SetBonusTime does its own two unconditional
+// get_Item calls (bonusEndTime, endTime) on
+// response["myPage"]["infinityStaminaBonus"], so that nested object needs
+// both keys present even though it's otherwise unrelated to the MyPage
+// class itself. "raid"/"guild" are the only two truly optional keys
+// (real .Contains() checks) — omitted here.
+function handleMyPage(req, fields) {
+  return {
+    myPage: {
+      loginBonus: [],
+      information: [],
+      banner: [],
+      startDashLogin: [],
+      eventBanner: {},
+      infinityStaminaBonus: { bonusEndTime: 0, endTime: 0 },
+    },
+    ts: nowUnix(),
+  };
+}
+
 // The asset-bundle "resource map" the client downloads right after
 // `inspection` succeeds. Must be a real Unity AssetBundle binary (not
 // JSON) containing one TextAsset named "BundleData" whose text is a JSON
@@ -401,6 +445,7 @@ const ROUTES = {
   '/webview/help': handleWebview,
   '/webview/news/list': handleWebview,
   '/login': handleLogin,
+  '/mypage': handleMyPage,
 };
 
 function handleUnknown(req, fields) {
