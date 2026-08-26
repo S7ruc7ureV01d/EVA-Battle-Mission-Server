@@ -1208,6 +1208,79 @@ targets if continuing the same approach. Puzzle-board/stage layout data
 remains genuinely unarchived (Tier 3) — would need synthesis from
 scratch, unlike cards/skills/chapters.
 
+## Session update (2026-08-26 — skill and chapter data)
+
+Extended the wiki-scraping pipeline to the two remaining Tier-1 targets
+identified earlier: member/leader skills and chapter titles.
+
+**Schema check first, via IL**: `Master.SkillMember`/`Master.SkillLeader`/
+`Master.Chapter` all extend `JsonDataCollection<T>` with plain
+`[JsonField]`-attributed properties — the same lenient reflection-based
+parser as `userCardList`, unlike `Master.Card`'s strict hand-generated
+`Parse()`. Missing fields default safely, so only wiki-documented fields
+needed populating:
+- `SkillMember` (9 fields: `memberSkillId`, `skillName`, `description`,
+  `targetElement`, `targetParam`, `effect`, `effectParam`, `effectTarget`,
+  `effectRange`) — only name/description come from the wiki; effect
+  fields left at 0 (no structured effect data on the wiki, and nothing
+  reads these outside real battle logic, which is out of scope).
+- `SkillLeader` (9 fields, same pattern): `leaderSkillId`, `skillName`,
+  `description`, `targetParam`, `effect`, `effectParam`, `effectTime`,
+  `blockFrom`, `blockTo`.
+- `Chapter` (12 fields): only `chapterId`/`chapterName` from the wiki;
+  `background`/`listIcon`/`modelName`/`pointX-Z`/`missionKind`/
+  `informationId`/`description` left at safe defaults (0/""/0.0).
+
+**Scraped from `eva-battlemission.gamerch.com`**:
+- **スキル一覧** ("skill list") page has a deduplicated summary table
+  (skill name + effect text) — 18 unique member skills.
+- **リーダースキル一覧** ("leader skill list") page only has a per-card
+  table (216 rows); deduplicated by (name, description) in Python down to
+  134 unique leader skills.
+- 22 chapter pages (`第1話`〜`第22話`, one per story chapter — confirmed
+  all 22 present via the same per-page URL-scrape technique used for
+  cards, not hand-typed) gave real chapter titles, e.g. "第1話 世界再建の要".
+  IDs are our own sequential numbering (wiki doesn't expose internal
+  IDs, and nothing besides our own `m_card`/`login` data references them).
+
+Added `server/data_m_skill_member.json`, `server/data_m_skill_leader.json`,
+`server/data_m_chapter.json`, wired into `MASTER_TABLE_DATA` in
+`server.js` alongside `m_card`.
+
+**`/login`'s `selectMission.chapterList` populated with real chapters**:
+traced `Response.Chapter::ParseList` via IL — also a lenient `JsonData<T>`
+parser, except one unconditional `get_Item("missionList")` cast to
+`IList` (must be present, empty array is fine — same pattern as the
+`tutorial` top-level-field quirk found earlier: one strict field in an
+otherwise-lenient class). `Response.Chapter::set_master` resolves the
+real `Master.Chapter` via `JsonDataCollection.Find(chapterId)`, so using
+matching `chapterId` values between `/master`'s `m_chapter` table and
+`/login`'s `chapterList` links them up correctly client-side, no
+duplication needed.
+
+**Confirmed on-device**: `/master` now serves 18/134/22 real entries for
+`m_skill_member`/`m_skill_leader`/`m_chapter`; `/login`'s `chapterList`
+carries all 22 real chapters. Reached the ミッション (mission) screen with
+zero crashes and zero chapter/mission-related exceptions in logcat — the
+mission-select panel itself renders visually empty (same pattern as the
+card list's missing thumbnails: no icon/background asset files exist for
+chapters either, so cells with no art likely don't draw, not a data
+error). Confirms the same scrape → encode → wire pipeline generalizes
+cleanly to other Tier-1 (`JsonDataCollection`/`JsonField`-based) master
+tables.
+
+**Unrelated, pre-existing issues surfaced by navigating further, not
+investigated**:
+- `Master.UserLevel.GetLevelFromAccumulateExp` throws
+  `InvalidOperationException` (`Enumerable.Last` with no match) inside
+  `HeaderController.Awake` — `m_user_level` is still an empty table.
+  Non-fatal (caught somewhere up the stack, menu still loads), but the
+  next natural Tier-1/Tier-2 target if continuing this same approach.
+- `GET /mypage` is a new, previously-unseen endpoint — falls through to
+  the generic unknown-route stub, causing a
+  `NullReferenceException` in `Response.MyPage.Parse`
+  (`MenuController.OnSuccess`). Not yet traced/handled.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community

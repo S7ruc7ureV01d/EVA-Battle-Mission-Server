@@ -1,0 +1,200 @@
+[
+ {
+  "memberSkillId": 1,
+  "skillName": "ヘキサブロック発生",
+  "description": "ヘキサブロックを発生させる",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 2,
+  "skillName": "クロスブロック発生",
+  "description": "クロスブロックを発生させる",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 3,
+  "skillName": "斬撃攻撃アップA",
+  "description": "発動時、斬撃ダメージが10％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 4,
+  "skillName": "斬撃攻撃アップB",
+  "description": "発動時、斬撃ダメージが20％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 5,
+  "skillName": "斬撃攻撃アップC",
+  "description": "発動時、斬撃ダメージが30％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 6,
+  "skillName": "射撃攻撃アップA",
+  "description": "発動時、射撃ダメージが10％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 7,
+  "skillName": "射撃攻撃アップB",
+  "description": "発動時、射撃ダメージが20％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 8,
+  "skillName": "射撃攻撃アップC",
+  "description": "発動時、射撃ダメージが30％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 9,
+  "skillName": "格闘攻撃アップA",
+  "description": "発動時、格闘ダメージが10％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 10,
+  "skillName": "格闘攻撃アップB",
+  "description": "発動時、格闘ダメージが20％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 11,
+  "skillName": "格闘攻撃アップC",
+  "description": "発動時、格闘ダメージが30％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 12,
+  "skillName": "敵防御ダウンA",
+  "description": "発動時、敵の防御力が10％ダウン",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 13,
+  "skillName": "敵防御ダウンB",
+  "description": "発動時、敵の防御力が20％ダウン",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 14,
+  "skillName": "敵防御ダウンC",
+  "description": "発動時、敵の防御力が30％ダウン",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 15,
+  "skillName": "回復アップA",
+  "description": "発動時、回復量が10％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 16,
+  "skillName": "回復アップB",
+  "description": "発動時、回復量が20％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 17,
+  "skillName": "回復アップC",
+  "description": "発動時、回復量が30％アップ",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ },
+ {
+  "memberSkillId": 18,
+  "skillName": "敵攻撃遅延",
+  "description": "発動時、敵の次の攻撃までの時間が10～30％遅くなる",
+  "targetElement": 0,
+  "targetParam": 0,
+  "effect": 0,
+  "effectParam": 0,
+  "effectTarget": 0,
+  "effectRange": 0
+ }
+]

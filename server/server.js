@@ -214,8 +214,26 @@ const MASTER_TABLE_NAMES = [
 // info.md for the full scraping/encoding writeup.
 const CARD_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_card.json'), 'utf8'));
 
+// SkillMember/SkillLeader/Chapter (unlike Card) extend JsonDataCollection<T>
+// with plain [JsonField]-attributed properties — the LENIENT
+// reflection-based parser, confirmed via IL (no hand-generated Parse()).
+// Missing fields default safely, so only the wiki-documented fields
+// (name/description, or chapterId/chapterName) are populated; numeric
+// effect/target/position fields the wiki doesn't break out in structured
+// form are left at 0 — safe for display purposes, just not wired to real
+// battle-effect logic. IDs are our own sequential numbering (1..N), since
+// the wiki doesn't expose the real internal IDs and nothing besides our
+// own data (m_card's memberSkillId0-5/leaderSkillId0-5, currently all 0)
+// references them.
+const SKILL_MEMBER_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_skill_member.json'), 'utf8'));
+const SKILL_LEADER_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_skill_leader.json'), 'utf8'));
+const CHAPTER_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'data_m_chapter.json'), 'utf8'));
+
 const MASTER_TABLE_DATA = {
   m_card: CARD_DATA,
+  m_skill_member: SKILL_MEMBER_DATA,
+  m_skill_leader: SKILL_LEADER_DATA,
+  m_chapter: CHAPTER_DATA,
 };
 
 function handleMaster(req, fields) {
@@ -293,13 +311,31 @@ function handleWebview(req, fields) {
   };
 }
 
+// PlayerStatus.LoadMission's selectMission.chapterList feeds
+// Response.Chapter::LoadList, which per-entry calls ParseList (IL traced
+// above CHAPTER_DATA) — a LENIENT JsonData<T> parser like userCardList,
+// EXCEPT it does one unconditional get_Item("missionList") cast to IList,
+// so that key must be present (empty array is fine, no missions defined
+// yet). Response.Chapter::set_master resolves Master.Chapter by chapterId
+// via JsonDataCollection.Find — since /master's m_chapter table (below)
+// uses the same chapterId numbering, each of these correctly links up to
+// the real chapter name/title client-side.
+const CHAPTER_LIST = CHAPTER_DATA.map((c) => ({
+  chapterId: c.chapterId,
+  startTime: 0,
+  endTime: 0,
+  totalMissionPoint: 0,
+  totalMissionPointDaily: 0,
+  missionList: [],
+}));
+
 function handleLogin(req, fields) {
   return {
     login: {
       userCardList: USER_CARD_LIST,
       userDeckList: [],
       userStatus: {},
-      selectMission: { chapterList: [] },
+      selectMission: { chapterList: CHAPTER_LIST },
       maxCardExtension: 0,
       tosVersion: '1.0',
     },
