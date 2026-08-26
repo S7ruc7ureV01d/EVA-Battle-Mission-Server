@@ -388,6 +388,22 @@ function handleMyPage(req, fields) {
   };
 }
 
+// GachaController.GetGachaInfo() hits "gacha/list" (not just "gacha"),
+// and OnSuccess does an unconditional response["gachaMain"] get_Item then
+// Response.Gacha::Parse on it, which itself does one unconditional
+// jsonObj["gachaGroup"] get_Item cast to IList — empty array is safe
+// (Response.GachaGroup::Parse is only invoked per-entry, never on an
+// empty list). No real gacha/banner data exists on the wiki (it's
+// time-limited promotional content, not preserved), so this is
+// intentionally an empty roster rather than synthesized — same
+// reasoning as the empty story/stage content, just for a smaller table.
+function handleGachaList(req, fields) {
+  return {
+    gachaMain: { gachaGroup: [] },
+    ts: nowUnix(),
+  };
+}
+
 // The asset-bundle "resource map" the client downloads right after
 // `inspection` succeeds. Must be a real Unity AssetBundle binary (not
 // JSON) containing one TextAsset named "BundleData" whose text is a JSON
@@ -446,6 +462,7 @@ const ROUTES = {
   '/webview/news/list': handleWebview,
   '/login': handleLogin,
   '/mypage': handleMyPage,
+  '/gacha/list': handleGachaList,
 };
 
 function handleUnknown(req, fields) {

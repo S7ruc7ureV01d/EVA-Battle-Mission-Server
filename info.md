@@ -1327,6 +1327,55 @@ level number.
 → ToS → main-menu cycle, for the first time this project has reached
 this state. The menu itself is stable and idle with no further errors.
 
+## Session update (2026-08-26, continued — gacha/list, full menu sweep)
+
+Continued tapping through every bottom-tab screen from the now-stable
+main menu to find the next unhandled endpoint, same method as `/mypage`.
+
+**`GET gacha/list`** (note: the actual endpoint is `gacha/list`, not
+`/gacha` — `GachaController.GetGachaInfo()` calls
+`MakeRequest("gacha/list", true)`) threw a `NullReferenceException` in
+`Response.Gacha.Parse` (`GachaController.OnSuccess`). Traced via IL:
+`OnSuccess` does an unconditional `response["gachaMain"]` `get_Item`,
+then `Response.Gacha::Parse` on that sub-dict does one more unconditional
+`jsonObj["gachaGroup"]` `get_Item` cast to `IList` — empty array is safe,
+since `Response.GachaGroup::Parse` is only invoked per-entry inside the
+loop. `InitGachaWindow()` (called right after `Parse`) also degrades
+safely on an empty `gachaGroups` list (`Count()`→0,
+`AdjustWindowNum(0)`, empty `Select().GetEnumerator()` loop). No real
+gacha/banner data exists on the wiki (time-limited promotional content,
+never preserved) — sent an intentionally empty roster rather than
+synthesizing one, same reasoning as the empty stage/scenario content.
+Added `handleGachaList()` in `server.js`, routed `gacha/list` (not
+`/gacha`) to it.
+
+**Full menu sweep, confirmed on-device with zero exceptions**: マイページ
+(= the main hub itself), ミッション, カード (including 一覧/編成/進化/
+強化/限界突破/売却/図鑑 submenu), ショップ (エヴァストーン購入/所持カード
+枠拡張/行動力回復), ガチャ (loads cleanly with the empty roster, no
+crash), フレンド (フレンド一覧/フォロー/フォロワー/フレンド検索), ギルド
+(ギルドを作成する/探す/スカウトギルド一覧). All navigate and render
+without a single exception in logcat.
+
+**Bonus confirmation of the chapter scrape**: an in-game "エピソード一覧"
+(episode list) dialog — reached incidentally while navigating — renders
+all 22 real scraped chapter titles (e.g. "第22話 5人目のパイロット",
+"第21話 正規実用型8号機", "第20話 新たなエヴァ") each marked "CLEAR",
+confirming the `m_chapter` data renders correctly in at least one more
+UI surface beyond the mission-select panel.
+
+**Residual, unrelated flakiness noted again**: the intermittent
+WebView-renderer crash-to-home-screen (`chromium: aw_browser_terminator`
+et al.) recurred once during this sweep, unrelated to any app data —
+same as previously documented, a relaunch always recovers and, since ToS
+acceptance persists, skips straight back to the main menu.
+
+**Current status**: every top-level menu screen is reachable and stable
+with zero exceptions. The natural next step is descending one level
+further into each submenu (一覧/編成/進化 under カード, individual guild
+flows, etc.) to find the next unhandled endpoint or crash, continuing the
+same screen-by-screen method.
+
 ## Prior art search (2026-08-25)
 
 Searched web (English and Japanese) for any existing community
